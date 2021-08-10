@@ -402,6 +402,7 @@ static int put_nxflat_import(asymbol *sym, void *arg)
           /* The normal case */
           if (IS_OBJECT(sym)) {
             //sprintf(thunk, obj_format, MKOBJARGS(func_name, counter));
+            counter++;
             return 0;
           } else {
             sprintf(thunk, dyncall_format, MKCALLARGS(func_name, counter));

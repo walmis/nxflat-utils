@@ -1775,13 +1775,13 @@ static void resolve_segment_relocs (bfd *input_bfd, segment_info *inf,
                     (long )*target, rel_sym->name, (long )sym_value);
 
                 /* check if symbol is undefined and in the imports */
-                if (!(rel_sym->flags & (BSF_LOCAL|BSF_GLOBAL|BSF_FUNCTION)))
+                if (!(rel_sym->flags & (BSF_LOCAL|BSF_GLOBAL|BSF_FUNCTION|BSF_WEAK)))
                   {
                     asymbol* import = find_import(rel_sym->name);
                     if(!import)
                       {
-                        err("No import entry for undefined symbol '%s'\n",
-                            rel_sym->name);
+                        err("No import entry for undefined symbol '%s' sym flags: 0x%04X\n",
+                            rel_sym->name, rel_sym->flags);
                         nerrors++;
                         break;
                       }
@@ -1928,7 +1928,7 @@ static void allocate_segment_got (bfd *input_bfd, segment_info *inf,
               /* This symbol requires a global offset table entry.  */
               {
                 /* check if symbol is defined */
-                if(rel_sym->flags & (BSF_LOCAL|BSF_GLOBAL|BSF_FUNCTION))
+                if(rel_sym->flags & (BSF_LOCAL|BSF_GLOBAL|BSF_FUNCTION|BSF_WEAK))
                   {
                     alloc_got_entry(rel_sym);
 
@@ -2374,10 +2374,7 @@ static void output_got (int fd)
           /* If the symbol is a thumb function, then set bit 1 of the value */
 
 #ifdef NXFLAT_THUMB2
-          if ((((elf_symbol_type*) rel_sym)->internal_elf_sym.st_info & 0x0f)
-              == STT_ARM_TFUNC || //obsolete symbol
-              (((elf_symbol_type*) rel_sym)->internal_elf_sym.st_info & 0x0f)
-                  == STT_FUNC)
+          if(is_thumb_func(rel_sym))
             {
               sym_value |= 1;
             }
